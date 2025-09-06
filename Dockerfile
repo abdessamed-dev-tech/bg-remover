@@ -20,7 +20,8 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 
 COPY . .
 
-EXPOSE 8001
+# Render sets the PORT env var for web services. Bind Uvicorn to it.
+# EXPOSE is not required by Render, but keeping a conventional default (8000) helps locally.
+EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
-
+CMD ["/bin/sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
