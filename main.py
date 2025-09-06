@@ -7,7 +7,12 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from PIL import Image
-import pillow_avif  # noqa: F401 - registers AVIF encoder
+# Try to enable AVIF support; if it fails (missing native libs), keep running.
+try:
+    import pillow_avif  # noqa: F401 - registers AVIF encoder
+    AVIF_ENABLED = True
+except Exception:
+    AVIF_ENABLED = False
 
 from rembg import remove, new_session
 
@@ -55,7 +60,11 @@ def encode_image(img: Image.Image, fmt: str, quality: int) -> bytes:
     elif fmt == "webp":
         img.save(buf, format="WEBP", quality=max(1, min(quality, 100)))
     elif fmt == "avif":
-        img.save(buf, format="AVIF", quality=max(1, min(quality, 100)))
+        if AVIF_ENABLED:
+            img.save(buf, format="AVIF", quality=max(1, min(quality, 100)))
+        else:
+            # Fall back to PNG if AVIF encoder is unavailable
+            img.save(buf, format="PNG", optimize=True)
     else:
         # PNG default preserves alpha
         img.save(buf, format="PNG", optimize=True)
@@ -107,4 +116,3 @@ async def remove_background(
 @app.get("/health")
 async def health():
     return {"ok": True}
-
