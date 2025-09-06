@@ -1,0 +1,14 @@
+# Python
+.venv/
+__pycache__/
+
+# Local storage (built files)
+storage/
+!storage/images/.gitkeep
+
+# OS/editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
